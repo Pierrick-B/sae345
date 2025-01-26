@@ -17,6 +17,7 @@ def auth_login():
 
 @auth_security.route('/login', methods=['POST'])
 def auth_login_post():
+
     mycursor = get_db().cursor()
     login = request.form.get('login')
     password = request.form.get('password')
@@ -67,7 +68,7 @@ def auth_signup_post():
     sql = """  INSERT INTO utilisateur (login,email,password,role) VALUES (%s, %s, %s, %s); """ # ajouter un nouveau user avec l'instruction INSERT
     mycursor.execute(sql, tuple_insert)
     get_db().commit()
-    sql = """  requete_auth_security_4  """ # récupérer le last insert id
+    sql = "SELECT LAST_INSERT_ID() AS last_insert_id;"
     mycursor.execute(sql)
     info_last_id = mycursor.fetchone()
     id_user = info_last_id['last_insert_id']

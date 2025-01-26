@@ -17,7 +17,20 @@ admin_article = Blueprint('admin_article', __name__,
 @admin_article.route('/admin/article/show')
 def show_article():
     mycursor = get_db().cursor()
-    sql = '''  requête admin_article_1
+    sql = '''  SELECT 
+        boisson.nom_boisson AS nom,
+        boisson.id_boisson AS id_article,
+        
+        boisson.stock_boisson AS stock,
+        boisson.photo_boisson AS image,
+        
+        boisson.type_boisson_id AS type_article_id,
+        boisson.prix_boisson AS prix,
+        type_boisson.nom_type_boisson AS libelle
+        
+    FROM boisson
+    INNER JOIN type_boisson ON boisson.type_boisson_id = type_boisson.id_type_boisson
+    ORDER BY boisson.type_boisson_id;
     '''
     mycursor.execute(sql)
     articles = mycursor.fetchall()

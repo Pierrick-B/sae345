@@ -14,12 +14,28 @@ def client_article_show():                                 # remplace client_ind
     mycursor = get_db().cursor()
     id_client = session['id_user']
 
-    sql = '''   selection des articles   '''
+    sql = '''
+            SELECT 
+                boisson.nom_boisson AS nom,
+                boisson.id_boisson AS id_article,
+                boisson.prix_boisson AS prix,
+                boisson.stock_boisson AS stock,
+                boisson.photo_boisson AS image,
+                type_boisson.nom_type_boisson AS libelle
+            FROM boisson
+            INNER JOIN type_boisson 
+                ON boisson.type_boisson_id = type_boisson.id_type_boisson
+            ORDER BY boisson.nom_boisson;
+        '''
+    mycursor.execute(sql)
+    boissons = mycursor.fetchall()
+    articles = boissons
+
     list_param = []
     condition_and = ""
     # utilisation du filtre
     sql3=''' prise en compte des commentaires et des notes dans le SQL    '''
-    articles =[]
+    # articles =[]
 
 
     # pour le filtre
@@ -33,6 +49,7 @@ def client_article_show():                                 # remplace client_ind
         prix_total = None
     else:
         prix_total = None
+
     return render_template('client/boutique/panier_article.html'
                            , articles=articles
                            , articles_panier=articles_panier
