@@ -146,7 +146,7 @@ INSERT INTO boisson (id_boisson,nom_boisson, prix_boisson, volume_boisson, descr
 (NULL,'Coca-Cola', 1.50, '330ml', 'Boisson gazeuse sucrée au goût de Cola', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola.png',12, 1, 2),
 (NULL,'Coca-Cola Cherry',1.60,'330ml','Boisson gazeuse sucrée au goût de cerise', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola_cherry.png',10, 1, 3),
 (NULL,'Coca-Cola Pêche',1.70,'330ml','Boisson gazeuse sucrée au goût de pêche', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola_peche.jpg',7, 1, 8),
-(NULL,'Coca-Cola Citron',1.55,'330ml','Boisson gazeuse sucrée au goût de citron', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola_citron.jpg',9, 1, 5),
+(NULL,'Coca-Cola Citron',1.55,'330ml','Boisson gazeuse sucrée au goût de citron', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola_citron.png',9, 1, 5),
 
 (NULL,'Fanta Orange', 1.50, '330ml', 'Boisson gazeuse sucrée au goût d\'orange', 'Coca-Cola Company', 'Fanta', 'fanta_orange.png',14, 1, 4),
 (NULL,'Fanta Citron', 1.55, '330ml', 'Boisson gazeuse sucrée au goût de citron', 'Coca-Cola Company', 'Fanta', 'fanta_citron.png', 12,1, 5),
