@@ -257,3 +257,4 @@ SELECT
 FROM ligne_panier
 INNER JOIN utilisateur ON utilisateur.id_utilisateur=ligne_panier.utilisateur_id;
 
+--sidi
