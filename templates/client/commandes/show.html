@@ -64,25 +64,12 @@
                         </thead>
                         <tbody>
                         {% for commande in commandes %}
-                            <tr id="" {% if commande.etat_id == 1 %} style="background: #FFD600; font-weight: bold;" {% endif %}>
-                                <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
-                                <td> {{ commande.nbr_articles }} </td>
-                                <td>
-                                    {{ "{:,.2f} €".format(commande.prix_total) }}
-                                </td>
-                                <td style="text-align: center;">
-                                    {% if commande.etat_id == 1 %} <div style="background-color: #ba8b00; padding: 5px;">
-                                     {{ commande.libelle }}
-                                    </div>
-                                    {% else %} <div style="background-color: #34ce57; padding: 5px;">
-                                        {{ commande.libelle }} </div>
-                                    {% endif %}
-                                </td>
-                                <td style="text-align: center;">
-                                    <a href="/client/commande/show?id_commande={{ commande.id_commande }}">
-                                        <button class="btn btn-primary" > Details </button>
-                                    </a>
-                                </td>
+                            <tr>
+                                <td>{{ commande.id_commande }}</td>
+                                <td>{{ commande.date_achat_commande }}</td>
+                                <td>{{ commande.nbr_articles }}</td>
+                                <td>{{ commande.cout_total }}</td>
+                                <td>{{ commande.etat_id }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

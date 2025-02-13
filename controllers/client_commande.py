@@ -5,6 +5,8 @@ from flask import Flask, request, render_template, redirect, url_for, abort, fla
 from datetime import datetime
 from connexion_db import get_db
 
+
+
 client_commande = Blueprint('client_commande', __name__,
                         template_folder='templates')
 
@@ -66,9 +68,30 @@ def client_commande_add():
 def client_commande_show():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    sql = '''  selection des commandes ordonnées par état puis par date d'achat descendant '''
-    commandes = []
+    sql = '''SELECT 
+            commande.id_commande, 
+            commande.date_achat_commande, 
+            COUNT(ligne_commande.boisson_id) AS nbr_articles, 
+            SUM(ligne_commande.prix_ligne_commande * ligne_commande.quantite_ligne_commande) AS cout_total, 
+            commande.etat_id, 
+            utilisateur.login 
+            FROM 
+            commande
+            JOIN 
+                ligne_commande ON commande.id_commande = ligne_commande.commande_id
+            JOIN 
+                utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur  -- Changer id_client par utilisateur_id
+            WHERE 
+                utilisateur.id_utilisateur = %s
+            GROUP BY 
+                commande.id_commande, commande.date_achat_commande, commande.etat_id, utilisateur.login
+            ORDER BY 
+                commande.etat_id, commande.date_achat_commande DESC;
 
+
+'''
+    mycursor.execute(sql, (id_client,))
+    commandes = mycursor.fetchall()
     articles_commande = None
     commande_adresses = None
     id_commande = request.args.get('id_commande', None)
