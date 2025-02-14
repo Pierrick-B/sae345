@@ -12,7 +12,6 @@ client_article = Blueprint('client_article', __name__,
 @client_article.route('/client/article/show')              # remplace /client
 def client_article_show():                                 # remplace client_index
     mycursor = get_db().cursor()
-    id_client = session['id_user']
 
     sql = '''
             SELECT 
@@ -31,6 +30,26 @@ def client_article_show():                                 # remplace client_ind
     boissons = mycursor.fetchall()
     articles = boissons
 
+
+    id_client = session['id_user']
+    print(id_client)
+    mycursor = get_db().cursor()
+
+    sqlPanier='''
+    SELECT
+        boisson.nom_boisson AS nom,
+        ligne_panier.quantite_ligne_panier AS quantite,
+        boisson.prix_boisson AS prix
+    FROM ligne_panier
+    INNER JOIN boisson ON boisson.id_boisson=ligne_panier.boisson_id
+    WHERE ligne_panier.utilisateur_id=%s;
+    '''
+
+    mycursor.execute(sqlPanier,id_client)
+    boissons_panier = mycursor.fetchall()
+    articles_panier = boissons_panier
+    print(articles_panier)
+
     list_param = []
     condition_and = ""
     # utilisation du filtre
@@ -42,13 +61,26 @@ def client_article_show():                                 # remplace client_ind
     types_article = []
 
 
-    articles_panier = []
-
     if len(articles_panier) >= 1:
-        sql = ''' calcul du prix total du panier '''
         prix_total = None
+        # mycursor = get_db().cursor()
+        #
+        # sqlPrixTot = '''
+        #     SELECT
+        #         boisson.prix_boisson * COUNT(ligne_panier.quantite_ligne_panier) AS prix_total
+        #     FROM ligne_panier
+        #     INNER JOIN boisson ON ligne_panier.boisson_id=boisson.id_boisson
+        #     WHERE ligne_panier.utilisateur_id=2
+        #     GROUP BY ligne_panier.boisson_id;
+        #  '''
+        #
+        # mycursor.execute(sqlPrixTot, id_client)
+        # prix_total = mycursor.fetchone()
+        # print(prix_total)
     else:
         prix_total = None
+
+
 
     return render_template('client/boutique/panier_article.html'
                            , articles=articles
