@@ -15,6 +15,25 @@ def client_panier_add():
     id_client = session['id_user']
     id_article = request.form.get('id_article')
     quantite = request.form.get('quantite')
+
+    sql = '''SELECT * FROM ligne_panier WHERE boisson_id = %s AND utilisateur_id = %s'''
+    mycursor.execute(sql, (id_client, id_article))
+    article_panier = mycursor.fetchone()
+
+    mycursor.execute("SELECT * FROM boisson WHERE boisson_id = %s", (id_article,))
+    article = mycursor.fetchone()
+
+    if not (article_panier is None) and article_panier['quantité'] >= 1:
+        tuple_update = (quantite, id_client, id_article)
+        sql = '''UPDATE ligne_panier SET quantite_ligne_panier = quantite_ligne_panier+%s WHERE utilisateur_id = %s AND boisson_id = %s'''
+        mycursor.execute(sql, tuple_update)
+    else:
+        tuple_insert = (id_client, id_article, quantite)
+        sql = '''INSERT INTO ligne_panier(utilisateur_id, boisson_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES (%s, %s, %s, current_timestop )'''
+        mycursor.execute(sql, tuple_insert)
+
+    get_db().commit()
+    return redirect('/client/panier/show')
     # ---------
     #id_declinaison_article=request.form.get('id_declinaison_article',None)
     id_declinaison_article = 1

@@ -2,19 +2,19 @@ from flask import Flask, request, render_template, redirect, url_for, abort, fla
 
 import pymysql.cursors
 
-import os
-from dotenv import load_dotenv
-load_dotenv()
+#import os
+#from dotenv import load_dotenv
+#load_dotenv()
 
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         #
         db = pymysql.connect(
-            host=os.getenv("HOST"),
-            user=os.getenv("LOGIN"),
-            password=os.getenv("PASSWORD"),
-            database=os.getenv("DATABASE"),
+            host="localhost",
+            user="sidi",
+            password="mdp",
+            database="sae345",
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )

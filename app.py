@@ -4,8 +4,8 @@
 from flask import Flask, request, render_template, redirect, url_for, abort, flash, session, g
 from flask import Blueprint
 
-import os
-from dotenv import load_dotenv
+#import os
+#from dotenv import load_dotenv
 
 from controllers.auth_security import *
 from controllers.fixtures_load import *
