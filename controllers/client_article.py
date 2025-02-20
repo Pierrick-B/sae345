@@ -62,21 +62,21 @@ def client_article_show():                                 # remplace client_ind
 
 
     if len(articles_panier) >= 1:
-        prix_total = None
-        # mycursor = get_db().cursor()
-        #
-        # sqlPrixTot = '''
-        #     SELECT
-        #         boisson.prix_boisson * COUNT(ligne_panier.quantite_ligne_panier) AS prix_total
-        #     FROM ligne_panier
-        #     INNER JOIN boisson ON ligne_panier.boisson_id=boisson.id_boisson
-        #     WHERE ligne_panier.utilisateur_id=2
-        #     GROUP BY ligne_panier.boisson_id;
-        #  '''
-        #
-        # mycursor.execute(sqlPrixTot, id_client)
-        # prix_total = mycursor.fetchone()
-        # print(prix_total)
+        mycursor = get_db().cursor()
+
+        sqlPrixTot = '''           
+            SELECT 
+                SUM(boisson.prix_boisson * ligne_panier.quantite_ligne_panier) AS prix_total
+            FROM utilisateur 
+            INNER JOIN ligne_panier ON ligne_panier.utilisateur_id=utilisateur.id_utilisateur
+            INNER JOIN boisson ON boisson.id_boisson=ligne_panier.boisson_id
+            WHERE utilisateur.id_utilisateur=%s
+            GROUP BY utilisateur.id_utilisateur;
+         '''
+
+        mycursor.execute(sqlPrixTot, id_client)
+        prix_total = mycursor.fetchone()
+        print("LE PRIX TOT EST : ",prix_total)
     else:
         prix_total = None
 
@@ -85,6 +85,6 @@ def client_article_show():                                 # remplace client_ind
     return render_template('client/boutique/panier_article.html'
                            , articles=articles
                            , articles_panier=articles_panier
-                           #, prix_total=prix_total
+                           , prix_total=prix_total
                            , items_filtre=types_article
                            )
