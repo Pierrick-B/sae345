@@ -27,7 +27,7 @@ def client_article_show():                                 # remplace client_ind
             WHERE 1=1
         '''
 
-    print("CECI EST LA SESSION : ", session)
+    # print("CECI EST LA SESSION : ", session)
 
     if 'filter_word' in session:
         sqlBoisson+=f" AND boisson.nom_boisson LIKE '%{session['filter_word']}%'"
@@ -53,6 +53,7 @@ def client_article_show():                                 # remplace client_ind
 
     sqlPanier='''
     SELECT
+        boisson.id_boisson AS id_article,
         boisson.nom_boisson AS nom,
         ligne_panier.quantite_ligne_panier AS quantite,
         boisson.prix_boisson AS prix
@@ -64,7 +65,7 @@ def client_article_show():                                 # remplace client_ind
     mycursor.execute(sqlPanier,id_client)
     boissons_panier = mycursor.fetchall()
     articles_panier = boissons_panier
-    # print(articles_panier)
+    print(articles_panier)
 
     list_param = []
     condition_and = ""
