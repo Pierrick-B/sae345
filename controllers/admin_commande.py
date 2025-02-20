@@ -18,16 +18,48 @@ def admin_index():
 def admin_commande_show():
     mycursor = get_db().cursor()
     admin_id = session['id_user']
-    sql = '''      '''
+    sql = '''SELECT 
+                commande.id_commande, 
+                commande.etat_id, 
+                utilisateur.login, 
+                commande.date_achat_commande AS date_achat, 
+                SUM(ligne_commande.quantite_ligne_commande) AS nombre_boissons, 
+                SUM(ligne_commande.prix_ligne_commande * ligne_commande.quantite_ligne_commande) AS cout_total, 
+                etat.libelle_etat AS etat_commande
+            FROM commande
+            INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
+            INNER JOIN ligne_commande ON commande.id_commande = ligne_commande.commande_id
+            INNER JOIN etat ON commande.etat_id = etat.id_etat
+            GROUP BY commande.id_commande, commande.etat_id
+            ORDER BY commande.etat_id ASC;'''
 
-    commandes=[]
+    mycursor.execute(sql)
+    commandes = mycursor.fetchall()
 
     articles_commande = None
     commande_adresses = None
     id_commande = request.args.get('id_commande', None)
-    print(id_commande)
+    # print(id_commande)
     if id_commande != None:
-        sql = '''    '''
+        sql = '''
+            SELECT 
+                utilisateur.nom AS nom_client,
+                utilisateur.login AS login_client,
+                utilisateur.email AS email_client,
+                boisson.nom_boisson AS nom,
+                ligne_commande.quantite_ligne_commande AS quantite, 
+                ligne_commande.prix_ligne_commande AS prix, 
+                (ligne_commande.quantite_ligne_commande * ligne_commande.prix_ligne_commande) AS prix_ligne
+            FROM ligne_commande
+            INNER JOIN boisson ON ligne_commande.boisson_id = boisson.id_boisson
+            INNER JOIN commande ON ligne_commande.commande_id = commande.id_commande
+            INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
+            WHERE ligne_commande.commande_id = %s;
+        '''
+
+        mycursor.execute(sql, (id_commande,))
+        articles_commande = mycursor.fetchall()
+
         commande_adresses = []
     return render_template('admin/commandes/show.html'
                            , commandes=commandes
@@ -36,13 +68,15 @@ def admin_commande_show():
                            )
 
 
-@admin_commande.route('/admin/commande/valider', methods=['get','post'])
+@admin_commande.route('/admin/commande/valider', methods=['GET', 'POST'])
 def admin_commande_valider():
-    mycursor = get_db().cursor()
+    db = get_db()
+    mycursor = db.cursor()
     commande_id = request.form.get('id_commande', None)
-    if commande_id != None:
-        print(commande_id)
-        sql = '''           '''
-        mycursor.execute(sql, commande_id)
-        get_db().commit()
+    if commande_id is not None:
+        print("Bouton valide commande id : ", commande_id)
+        sql = '''UPDATE commande SET etat_id = 2 WHERE id_commande = %s;'''
+        mycursor.execute(sql, (commande_id,))
+        db.commit()
     return redirect('/admin/commande/show')
+

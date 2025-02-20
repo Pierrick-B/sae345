@@ -136,9 +136,8 @@ INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) 
     'ROLE_client','client2','1');
 
 INSERT INTO etat(id_etat,libelle_etat) VALUES
-(NULL,'En préparation'),
-(NULL,'Envoyé'),
-(NULL,'Livré');
+(1,'En préparation'),
+(2,'Expédiée');
 
 INSERT INTO boisson (id_boisson,nom_boisson, prix_boisson, volume_boisson, description_boisson, fournisseur_boisson, marque_boisson, photo_boisson, stock_boisson, type_boisson_id, arome_id) VALUES
 
@@ -193,9 +192,9 @@ INSERT INTO boisson (id_boisson,nom_boisson, prix_boisson, volume_boisson, descr
 
 
 INSERT INTO commande (id_commande, date_achat_commande, etat_id, utilisateur_id) VALUES
-(NULL, '2025-01-15', 1, 1),
+(NULL, '2025-01-15', 1, 2),
 (NULL, '2025-01-16', 2, 2),
-(NULL, '2025-01-17', 3, 3);
+(NULL, '2025-01-17', 2, 3);
 
 INSERT INTO ligne_commande (boisson_id, commande_id, quantite_ligne_commande, prix_ligne_commande) VALUES
 (1, 1, 2, 99.80),
@@ -204,9 +203,9 @@ INSERT INTO ligne_commande (boisson_id, commande_id, quantite_ligne_commande, pr
 (5, 3, 6, 15.00);
 
 INSERT INTO ligne_panier (boisson_id, utilisateur_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES
-(1, 1, 1, '2025-01-10'),
-(2, 1, 2, '2025-01-11'),
-(3, 2, 1, '2025-01-12'),
+(1, 2, 1, '2025-01-10'),
+(2, 2, 2, '2025-01-11'),
+(3, 3, 1, '2025-01-12'),
 (5, 3, 3, '2025-01-13');
 
 
