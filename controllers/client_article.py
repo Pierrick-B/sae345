@@ -13,7 +13,7 @@ client_article = Blueprint('client_article', __name__,
 def client_article_show():                                 # remplace client_index
     mycursor = get_db().cursor()
 
-    sql = '''
+    sqlBoisson = '''
             SELECT 
                 boisson.nom_boisson AS nom,
                 boisson.id_boisson AS id_article,
@@ -24,15 +24,31 @@ def client_article_show():                                 # remplace client_ind
             FROM boisson
             INNER JOIN type_boisson 
                 ON boisson.type_boisson_id = type_boisson.id_type_boisson
-            ORDER BY boisson.nom_boisson;
+            WHERE 1=1
         '''
-    mycursor.execute(sql)
+
+    print("CECI EST LA SESSION : ", session)
+
+    if 'filter_word' in session:
+        sqlBoisson+=f" AND boisson.nom_boisson LIKE '%{session['filter_word']}%'"
+    if (session.get('filter_prix_min')):
+        sqlBoisson+=f" AND boisson.prix_boisson > {session['filter_prix_min']} "
+    if (session.get('filter_prix_max')):
+        sqlBoisson+=f" AND boisson.prix_boisson < {session['filter_prix_max']} "
+    if (session.get('filter_types')):
+        sqlBoisson+=f" AND (boisson.type_boisson_id={session['filter_types'][0]}"
+        for id in session['filter_types']:
+            sqlBoisson+=f" OR boisson.type_boisson_id={id}"
+        sqlBoisson+=f") "
+
+    sqlBoisson += f" ORDER BY boisson.nom_boisson;"
+    mycursor.execute(sqlBoisson)
     boissons = mycursor.fetchall()
     articles = boissons
 
 
     id_client = session['id_user']
-    print(id_client)
+    # print(id_client)
     mycursor = get_db().cursor()
 
     sqlPanier='''
@@ -48,7 +64,7 @@ def client_article_show():                                 # remplace client_ind
     mycursor.execute(sqlPanier,id_client)
     boissons_panier = mycursor.fetchall()
     articles_panier = boissons_panier
-    print(articles_panier)
+    # print(articles_panier)
 
     list_param = []
     condition_and = ""
@@ -58,7 +74,17 @@ def client_article_show():                                 # remplace client_ind
 
 
     # pour le filtre
-    types_article = []
+
+    mycursor = get_db().cursor()
+    sqlTypeBoisson='''
+    SELECT 
+        type_boisson.id_type_boisson AS id_type_article,
+        type_boisson.nom_type_boisson AS libelle
+    FROM type_boisson;
+    '''
+    mycursor.execute(sqlTypeBoisson)
+    types_article = mycursor.fetchall()
+    # print(types_article)
 
 
     if len(articles_panier) >= 1:
@@ -76,7 +102,7 @@ def client_article_show():                                 # remplace client_ind
 
         mycursor.execute(sqlPrixTot, id_client)
         prix_total = mycursor.fetchone()
-        print("LE PRIX TOT EST : ",prix_total)
+        # print("LE PRIX TOT EST : ",prix_total)
     else:
         prix_total = None
 

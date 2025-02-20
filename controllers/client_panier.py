@@ -122,6 +122,21 @@ def client_panier_filtre():
     filter_prix_min = request.form.get('filter_prix_min', None)
     filter_prix_max = request.form.get('filter_prix_max', None)
     filter_types = request.form.getlist('filter_types', None)
+    print("LA LISTE DES TYPE BOISSONS DU FILTRE EST : ",filter_types)
+
+
+
+    if (filter_word and filter_word!=""):
+        session["filter_word"] = filter_word
+    if (filter_prix_min and filter_prix_min!=""):
+        session["filter_prix_min"] = filter_prix_min
+    if (filter_prix_max and filter_prix_max!=""):
+        session["filter_prix_max"] = filter_prix_max
+    if (filter_types and filter_types!=[]):
+        session['filter_types']=[]
+        for i in filter_types:
+            session['filter_types'].append(i)
+
     # test des variables puis
     # mise en session des variables
     return redirect('/client/article/show')
@@ -130,5 +145,10 @@ def client_panier_filtre():
 @client_panier.route('/client/panier/filtre/suppr', methods=['POST'])
 def client_panier_filtre_suppr():
     # suppression  des variables en session
+    session.pop('filter_word', None)
+    session.pop('filter_prix_min', None)
+    session.pop('filter_prix_max', None)
+    session.pop('filter_types', None)
+
     print("suppr filtre")
     return redirect('/client/article/show')
