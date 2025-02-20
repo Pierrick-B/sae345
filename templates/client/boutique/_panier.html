@@ -60,7 +60,7 @@
                     </form>
                     {% endif %}
                     {% if prix_total %}
-                    Total à payer : <strong>{{ "{:,.2f} €".format(prix_total) }}</strong>
+                    Total à payer : <strong>{{prix_total.prix_total}}€</strong>
                     {% endif %}
 
             {% endif %}
