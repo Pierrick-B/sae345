@@ -70,8 +70,8 @@ def client_commande_show():
     id_client = session['id_user']
     sql = '''SELECT 
             commande.id_commande, 
-            commande.date_achat_commande, 
-            COUNT(ligne_commande.boisson_id) AS nbr_articles, 
+            commande.date_achat_commande AS date_achat, 
+            SUM(ligne_commande.quantite_ligne_commande) AS nbr_articles, 
             SUM(ligne_commande.prix_ligne_commande * ligne_commande.quantite_ligne_commande) AS cout_total, 
             commande.etat_id, 
             utilisateur.login 
@@ -80,7 +80,7 @@ def client_commande_show():
             JOIN 
                 ligne_commande ON commande.id_commande = ligne_commande.commande_id
             JOIN 
-                utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur  -- Changer id_client par utilisateur_id
+                utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur  
             WHERE 
                 utilisateur.id_utilisateur = %s
             GROUP BY 
@@ -97,7 +97,17 @@ def client_commande_show():
     id_commande = request.args.get('id_commande', None)
     if id_commande != None:
         print(id_commande)
-        sql = ''' selection du détails d'une commande '''
+        sql = '''SELECT 
+                boisson.nom_boisson AS nom,
+                ligne_commande.quantite_ligne_commande AS quantite, 
+                ligne_commande.prix_ligne_commande AS prix, 
+                (ligne_commande.quantite_ligne_commande * ligne_commande.prix_ligne_commande) AS prix_ligne
+                FROM ligne_commande
+                INNER JOIN boisson ON ligne_commande.boisson_id = boisson.id_boisson
+                INNER JOIN commande ON ligne_commande.commande_id = commande.id_commande
+                INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
+                WHERE ligne_commande.commande_id = %s;
+                '''
 
         # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
         sql = ''' selection des adressses '''
@@ -107,4 +117,3 @@ def client_commande_show():
                            , articles_commande=articles_commande
                            , commande_adresses=commande_adresses
                            )
-
