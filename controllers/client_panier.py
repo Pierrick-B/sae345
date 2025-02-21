@@ -11,29 +11,35 @@ client_panier = Blueprint('client_panier', __name__,
 
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
-    mycursor = get_db().cursor()
+    db = get_db()
+    mycursor = db.cursor()
     id_client = session['id_user']
     id_article = request.form.get('id_article')
     quantite = request.form.get('quantite')
 
     sql = '''SELECT * FROM ligne_panier WHERE boisson_id = %s AND utilisateur_id = %s'''
-    mycursor.execute(sql, (id_client, id_article))
-    article_panier = mycursor.fetchone()
+    mycursor.execute(sql, (id_article, id_client))
+    articles_panier = mycursor.fetchone()
 
-    mycursor.execute("SELECT * FROM boisson WHERE boisson_id = %s", (id_article,))
+    mycursor.execute("SELECT * FROM boisson WHERE id_boisson = %s", (id_article,))
     article = mycursor.fetchone()
 
-    if not (article_panier is None) and article_panier['quantité'] >= 1:
+    if not (articles_panier is None) and article['stock_boisson'] >=int(quantite):
         tuple_update = (quantite, id_client, id_article)
         sql = '''UPDATE ligne_panier SET quantite_ligne_panier = quantite_ligne_panier+%s WHERE utilisateur_id = %s AND boisson_id = %s'''
         mycursor.execute(sql, tuple_update)
+        sql = '''UPDATE boisson SET stock_boisson = stock_boisson-%s WHERE id_boisson = %s'''
+        mycursor.execute(sql, (quantite, id_article))
     else:
-        tuple_insert = (id_client, id_article, quantite)
-        sql = '''INSERT INTO ligne_panier(utilisateur_id, boisson_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES (%s, %s, %s, current_timestop )'''
-        mycursor.execute(sql, tuple_insert)
+        if article['stock_boisson'] >= int(quantite):
+            tuple_insert = (id_article, id_client, quantite)
+            sql = '''INSERT INTO ligne_panier(boisson_id ,utilisateur_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES (%s, %s, %s, current_timestamp )'''
+            mycursor.execute(sql, tuple_insert)
+            sql = '''UPDATE boisson SET stock_boisson = stock_boisson-%s WHERE id_boisson = %s'''
+            mycursor.execute(sql, (quantite, id_article))
 
-    get_db().commit()
-    return redirect('/client/panier/show')
+    db.commit()
+    return redirect('/client/article/show')
     # ---------
     #id_declinaison_article=request.form.get('id_declinaison_article',None)
     id_declinaison_article = 1
@@ -69,15 +75,22 @@ def client_panier_delete():
 
     # ---------
     # partie 2 : on supprime une déclinaison de l'article
-    # id_declinaison_article = request.form.get('id_declinaison_article', None)
+    id_declinaison_article = request.form.get('id_declinaison_article', None)
 
-    sql = ''' selection de la ligne du panier pour l'article et l'utilisateur connecté'''
+    sql = ''' SELECT * FROM ligne_panier WHERE id_boisson = %s AND utilisateur_id = %s'''
     article_panier=[]
+    mycursor.execute(sql, (id_client, id_article))
+    article_panier = mycursor.fetchone()
+
 
     if not(article_panier is None) and article_panier['quantite'] > 1:
-        sql = ''' mise à jour de la quantité dans le panier => -1 article '''
+        tuple_update = (quantite, id_client, id_article)
+        sql = '''UPDATE ligne_panier SET quantite_ligne_panier = quantite_ligne_panier+%s WHERE utilisateur_id = %s AND id_boisson = %s'''
+        mycursor.execute(sql, tuple_update)
     else:
-        sql = ''' suppression de la ligne de panier'''
+        tuple_insert = (id_client, id_article, quantite)
+        sql = '''DELETE FROM ligne_panier(utilisateur_id, id_boisson, quantite_ligne_panier, date_ajout_ligne_panier) VALUES (%s, %s, %s, current_timestop )'''
+        mycursor.execute(sql, tuple_insert)
 
     # mise à jour du stock de l'article disponible
     get_db().commit()
@@ -91,7 +104,7 @@ def client_panier_delete():
 def client_panier_vider():
     mycursor = get_db().cursor()
     client_id = session['id_user']
-    sql = ''' sélection des lignes de panier'''
+    sql = ''' SELECT * FROM ligne_panier'''
     items_panier = []
     for item in items_panier:
         sql = ''' suppression de la ligne de panier de l'article pour l'utilisateur connecté'''
