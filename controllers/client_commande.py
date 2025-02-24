@@ -72,11 +72,11 @@ def client_commande_show():
             commande.id_commande, 
             commande.date_achat_commande AS date_achat, 
             SUM(ligne_commande.quantite_ligne_commande) AS nbr_articles, 
-            SUM(ligne_commande.prix_ligne_commande * ligne_commande.quantite_ligne_commande) AS cout_total, 
+            SUM(ligne_commande.prix_ligne_commande) AS cout_total, 
             commande.etat_id, 
             utilisateur.login 
             FROM 
-            commande
+                commande
             JOIN 
                 ligne_commande ON commande.id_commande = ligne_commande.commande_id
             JOIN 
@@ -84,10 +84,13 @@ def client_commande_show():
             WHERE 
                 utilisateur.id_utilisateur = %s
             GROUP BY 
-                commande.id_commande, commande.date_achat_commande, commande.etat_id, utilisateur.login
+                commande.id_commande, 
+                commande.date_achat_commande, 
+                commande.etat_id, 
+                utilisateur.login
             ORDER BY 
-                commande.etat_id, commande.date_achat_commande DESC;
-
+                commande.etat_id, 
+                commande.date_achat_commande DESC;
 
 '''
     mycursor.execute(sql, (id_client,))
