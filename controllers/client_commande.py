@@ -95,8 +95,8 @@ def client_commande_show():
 '''
     mycursor.execute(sql, (id_client,))
     commandes = mycursor.fetchall()
-    articles_commande = None
-    commande_adresses = None
+    articles_commande = []
+    commande_adresses = ""
     id_commande = request.args.get('id_commande', None)
     if id_commande != None:
         print(id_commande)
@@ -111,7 +111,8 @@ def client_commande_show():
                 INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
                 WHERE ligne_commande.commande_id = %s;
                 '''
-
+        mycursor.execute(sql, (id_commande,))
+        articles_commande = mycursor.fetchall()
         # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
         sql = ''' selection des adressses '''
 
