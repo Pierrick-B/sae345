@@ -64,13 +64,13 @@
                         </thead>
                         <tbody>
                         {% for commande in commandes %}
-                            <tr id="" {% if commande.etat_id == 1 %} style="background: #FFD600; font-weight: bold;" {% endif %}>
+                            <tr id="tr" {% if commande.etat_id == 1 %} style="background-color:#FFD600; font-weight: bold;" {% endif %}>
                                 <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
                                 <td> {{ commande.nbr_articles }} </td>
                                 <td>
                                     {{ commande.cout_total }} €
                                 </td>
-                                <td style="text-align: center;">
+                                <td style="text-align: center;"  >
                                     {% if commande.etat_id == 1 %} <div style="background-color: #ba8b00; padding: 5px;">
                                       en cours de traitement
                                     </div>

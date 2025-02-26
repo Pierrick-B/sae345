@@ -72,13 +72,15 @@ def client_commande_show():
             commande.id_commande, 
             commande.date_achat_commande AS date_achat, 
             SUM(ligne_commande.quantite_ligne_commande) AS nbr_articles, 
-            SUM(ligne_commande.prix_ligne_commande) AS cout_total, 
+            SUM(ligne_commande.quantite_ligne_commande * boisson.prix_boisson) AS cout_total, -- Calcul de cout_total avec SUM
             commande.etat_id, 
             utilisateur.login 
             FROM 
                 commande
             JOIN 
                 ligne_commande ON commande.id_commande = ligne_commande.commande_id
+            JOIN 
+                boisson ON ligne_commande.boisson_id = boisson.id_boisson
             JOIN 
                 utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur  
             WHERE 
@@ -91,7 +93,6 @@ def client_commande_show():
             ORDER BY 
                 commande.etat_id, 
                 commande.date_achat_commande DESC;
-
 '''
     mycursor.execute(sql, (id_client,))
     commandes = mycursor.fetchall()
@@ -103,8 +104,8 @@ def client_commande_show():
         sql = '''SELECT 
                 boisson.nom_boisson AS nom,
                 ligne_commande.quantite_ligne_commande AS quantite, 
-                ligne_commande.prix_ligne_commande AS prix, 
-                (ligne_commande.quantite_ligne_commande * ligne_commande.prix_ligne_commande) AS prix_ligne
+                boisson.prix_boisson AS prix, 
+                (ligne_commande.quantite_ligne_commande * boisson.prix_boisson) AS prix_ligne
                 FROM ligne_commande
                 INNER JOIN boisson ON ligne_commande.boisson_id = boisson.id_boisson
                 INNER JOIN commande ON ligne_commande.commande_id = commande.id_commande
@@ -114,8 +115,27 @@ def client_commande_show():
         mycursor.execute(sql, (id_commande,))
         articles_commande = mycursor.fetchall()
         # partie 2 : selection de l'adresse de livraison et de facturation de la commande selectionnée
-        sql = ''' selection des adressses '''
-
+        sql = '''SELECT 
+                    commande_adresse.nom_livraison,
+                    commande_adresse.rue_livraison,
+                    commande_adresse.code_postal_livraison,
+                    commande_adresse.ville_livraison,
+                    commande_adresse.nom_facturation,
+                    commande_adresse.rue_facturation,
+                    commande_adresse.code_postal_facturation,
+                    commande_adresse.ville_facturation,
+                    CASE
+                        WHEN commande_adresse.nom_livraison = commande_adresse.nom_facturation
+                            AND commande_adresse.rue_livraison = commande_adresse.rue_facturation
+                            AND commande_adresse.code_postal_livraison = commande_adresse.code_postal_facturation
+                            AND commande_adresse.ville_livraison = commande_adresse.ville_facturation
+                        THEN 'adresse_identique'
+                        ELSE 'adresse_différente'
+                    END AS adresse_identique
+                FROM commande_adresse
+                WHERE commande_adresse.commande_id = %s;'''
+        mycursor.execute(sql, (id_commande,))
+        commande_adresses = mycursor.fetchone()
     return render_template('client/commandes/show.html'
                            , commandes=commandes
                            , articles_commande=articles_commande
