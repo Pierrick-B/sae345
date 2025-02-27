@@ -18,38 +18,47 @@ def admin_index():
 def admin_commande_show():
     mycursor = get_db().cursor()
     admin_id = session['id_user']
-    sql = '''SELECT 
-                commande.id_commande, 
-                commande.etat_id, 
-                utilisateur.login, 
-                commande.date_achat_commande AS date_achat, 
-                SUM(ligne_commande.quantite_ligne_commande) AS nombre_boissons, 
-                SUM(ligne_commande.prix_ligne_commande * ligne_commande.quantite_ligne_commande) AS cout_total, 
-                etat.libelle_etat AS etat_commande
-            FROM commande
-            INNER JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur
-            INNER JOIN ligne_commande ON commande.id_commande = ligne_commande.commande_id
-            INNER JOIN etat ON commande.etat_id = etat.id_etat
-            GROUP BY commande.id_commande, commande.etat_id
-            ORDER BY commande.etat_id ASC;'''
+    sql = '''
+        SELECT 
+            commande.id_commande, 
+            commande.date_achat_commande AS date_achat, 
+            SUM(ligne_commande.quantite_ligne_commande) AS nbr_articles, 
+            SUM(ligne_commande.quantite_ligne_commande * boisson.prix_boisson) AS cout_total, 
+            commande.etat_id, 
+            utilisateur.login, 
+            etat.libelle_etat AS etat_commande
+        FROM commande
+        JOIN ligne_commande ON commande.id_commande = ligne_commande.commande_id
+        JOIN boisson ON ligne_commande.boisson_id = boisson.id_boisson
+        JOIN utilisateur ON commande.utilisateur_id = utilisateur.id_utilisateur  
+        JOIN etat ON commande.etat_id = etat.id_etat
+        GROUP BY 
+            commande.id_commande, 
+            commande.date_achat_commande, 
+            commande.etat_id, 
+            utilisateur.login, 
+            etat.libelle_etat
+        ORDER BY 
+            commande.etat_id, 
+            commande.date_achat_commande DESC;
+    '''
 
     mycursor.execute(sql)
     commandes = mycursor.fetchall()
 
-    articles_commande = None
-    commande_adresses = None
+    articles_commande = []
+    commande_adresses = ""
     id_commande = request.args.get('id_commande', None)
-    # print(id_commande)
     if id_commande != None:
-        sql = '''
+        sql_articles = '''
             SELECT 
                 utilisateur.nom AS nom_client,
                 utilisateur.login AS login_client,
                 utilisateur.email AS email_client,
                 boisson.nom_boisson AS nom,
                 ligne_commande.quantite_ligne_commande AS quantite, 
-                ligne_commande.prix_ligne_commande AS prix, 
-                (ligne_commande.quantite_ligne_commande * ligne_commande.prix_ligne_commande) AS prix_ligne
+                boisson.prix_boisson AS prix, 
+                (ligne_commande.quantite_ligne_commande * boisson.prix_boisson) AS prix_ligne
             FROM ligne_commande
             INNER JOIN boisson ON ligne_commande.boisson_id = boisson.id_boisson
             INNER JOIN commande ON ligne_commande.commande_id = commande.id_commande
@@ -57,10 +66,34 @@ def admin_commande_show():
             WHERE ligne_commande.commande_id = %s;
         '''
 
-        mycursor.execute(sql, (id_commande,))
+        mycursor.execute(sql_articles, (id_commande,))
         articles_commande = mycursor.fetchall()
 
-        commande_adresses = []
+        sql_address = '''
+            SELECT
+                commande_adresse.nom_livraison,
+                commande_adresse.rue_livraison,
+                commande_adresse.code_postal_livraison,
+                commande_adresse.ville_livraison,
+                commande_adresse.nom_facturation,
+                commande_adresse.rue_facturation,
+                commande_adresse.code_postal_facturation,
+                commande_adresse.ville_facturation,
+                CASE
+                    WHEN commande_adresse.nom_livraison = commande_adresse.nom_facturation
+                        AND commande_adresse.rue_livraison = commande_adresse.rue_facturation
+                        AND commande_adresse.code_postal_livraison = commande_adresse.code_postal_facturation
+                        AND commande_adresse.ville_livraison = commande_adresse.ville_facturation
+                    THEN 'adresse_identique'
+                    ELSE 'adresse_différente'
+                END AS adresse_identique
+            FROM commande_adresse
+            WHERE commande_adresse.commande_id = %s;
+        '''
+
+        mycursor.execute(sql_address, (id_commande,))
+        commande_adresses = mycursor.fetchone()
+
     return render_template('admin/commandes/show.html'
                            , commandes=commandes
                            , articles_commande=articles_commande
