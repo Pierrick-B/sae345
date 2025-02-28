@@ -25,7 +25,7 @@
                             <td>
 {# #}                            {% if item_panier.stock is defined %}
 {# #}                               {% if item_panier.stock > 0 %}
-                                <form action="/client/panier/add"  style="display: inline-block;"  method="post">
+                                        <form action="/client/panier/add"  style="display: inline-block;"  method="post">
 {# #}                                   <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
                                         <input type="hidden" name="quantite" value="1">
                                         <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
@@ -40,6 +40,7 @@
                                 </form>
 
                                 <form action="/client/panier/delete/line"  style="display: inline-block;"  method="post">
+                                    <input type="hidden" name="quantite" value="{{ item_panier.quantite }}">
 {# #}                               <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
                                     <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
                                     <button class="btn btn-primary" >Supprimer</button>

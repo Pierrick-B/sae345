@@ -65,7 +65,7 @@ def client_article_show():                                 # remplace client_ind
     mycursor.execute(sqlPanier,id_client)
     boissons_panier = mycursor.fetchall()
     articles_panier = boissons_panier
-    print(articles_panier)
+    # print(articles_panier)
 
     list_param = []
     condition_and = ""

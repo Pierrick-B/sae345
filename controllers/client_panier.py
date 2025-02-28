@@ -62,58 +62,126 @@ def client_panier_add():
 
 @client_panier.route('/client/panier/delete', methods=['POST'])
 def client_panier_delete():
-    mycursor = get_db().cursor()
+
     id_client = session['id_user']
     id_article = request.form.get('id_article','')
+    # print("ID ARTICLE : ",id_article)
+    # print("ID UTILISATEUR : ", id_client)
     quantite = 1
 
     # ---------
     # partie 2 : on supprime une déclinaison de l'article
     # id_declinaison_article = request.form.get('id_declinaison_article', None)
-
-    sql = ''' selection de la ligne du panier pour l'article et l'utilisateur connecté'''
-    article_panier=[]
+    mycursor = get_db().cursor()
+    sqlBoisson = ''' 
+        SELECT 
+            ligne_panier.quantite_ligne_panier AS quantite
+        FROM ligne_panier
+        WHERE ligne_panier.boisson_id = %s AND ligne_panier.utilisateur_id=%s ;
+    '''
+    mycursor.execute(sqlBoisson,(id_article,id_client))
+    article_panier=mycursor.fetchone()
+    # print("VOICI L'ARTICLE DONT ON VEUT ENLEVER UN ELEMENT DANS LE PANIER : ",article_panier)
 
     if not(article_panier is None) and article_panier['quantite'] > 1:
-        sql = ''' mise à jour de la quantité dans le panier => -1 article '''
+        # print("LA QUANTITE EST SUPERIEUR À 1")
+
+        db = get_db()
+        mycursor = db.cursor()
+        sqlEnleve = ''' UPDATE ligne_panier SET ligne_panier.quantite_ligne_panier=ligne_panier.quantite_ligne_panier-1 WHERE ligne_panier.boisson_id = %s ;'''
+        mycursor.execute(sqlEnleve, id_article)
+        db.commit()
+
     else:
-        sql = ''' suppression de la ligne de panier'''
+        # print("LA QUANTITE EST ÉGALE À 1")
 
-    # mise à jour du stock de l'article disponible
-    get_db().commit()
-    return redirect('/client/article/show')
+        db = get_db()
+        mycursor = db.cursor()
+        sqlDelete = ''' DELETE FROM ligne_panier WHERE ligne_panier.boisson_id = %s AND ligne_panier.utilisateur_id=%s;'''
+        mycursor.execute(sqlDelete, (id_article, id_client))
+        db.commit()
 
+    db = get_db()
+    mycursor = db.cursor()
+    sqlAjout = '''UPDATE boisson SET boisson.stock_boisson = boisson.stock_boisson+1 WHERE boisson.id_boisson = %s; '''
+    mycursor.execute(sqlAjout, id_article)
+    db.commit()
 
-
-
-
-@client_panier.route('/client/panier/vider', methods=['POST'])
-def client_panier_vider():
-    mycursor = get_db().cursor()
-    client_id = session['id_user']
-    sql = ''' sélection des lignes de panier'''
-    items_panier = []
-    for item in items_panier:
-        sql = ''' suppression de la ligne de panier de l'article pour l'utilisateur connecté'''
-
-        sql2=''' mise à jour du stock de l'article : stock = stock + qté de la ligne pour l'article'''
-        get_db().commit()
     return redirect('/client/article/show')
 
 
 @client_panier.route('/client/panier/delete/line', methods=['POST'])
 def client_panier_delete_line():
-    mycursor = get_db().cursor()
     id_client = session['id_user']
-    #id_declinaison_article = request.form.get('id_declinaison_article')
+    id_article = request.form.get('id_article')
+    quantite=request.form.get('quantite')
+    #print("ID UTILISATEUR : ",id_client)
+    #print("ID ARTICLE : ", id_article)
+    #print("QUANTITÉ : ", quantite)
 
-    sql = ''' selection de ligne du panier '''
+    mycursor = get_db().cursor()
+    sqlLigne = '''  
+    SELECT
+        ligne_panier.quantite_ligne_panier AS quantite
+    FROM ligne_panier
+    WHERE ligne_panier.boisson_id = %s AND ligne_panier.utilisateur_id = %s ;'''
+    mycursor.execute(sqlLigne,(id_article,id_client))
+    ligne=mycursor.fetchone()
+    #print(ligne)
 
-    sql = ''' suppression de la ligne du panier '''
-    sql2=''' mise à jour du stock de l'article : stock = stock + qté de la ligne pour l'article'''
+    db = get_db()
+    mycursor = db.cursor()
+    sqlDelete = ''' DELETE FROM ligne_panier WHERE ligne_panier.boisson_id = %s AND ligne_panier.utilisateur_id=%s;'''
+    mycursor.execute(sqlDelete, (id_article, id_client))
+    db.commit()
 
-    get_db().commit()
+    db = get_db()
+    mycursor = db.cursor()
+    sqlAjout = '''UPDATE boisson SET boisson.stock_boisson = boisson.stock_boisson+%s WHERE boisson.id_boisson = %s; '''
+    mycursor.execute(sqlAjout,(quantite, id_article))
+    db.commit()
+
     return redirect('/client/article/show')
+
+
+@client_panier.route('/client/panier/vider', methods=['POST'])
+def client_panier_vider():
+    id_client = session['id_user']
+    #print("ID UTILISATEUR : ", id_client)
+
+    mycursor=get_db().cursor()
+    sqlPanier = '''
+        SELECT 
+            ligne_panier.boisson_id AS id_boisson,
+            ligne_panier.quantite_ligne_panier AS quantite
+            
+        FROM ligne_panier
+        WHERE ligne_panier.utilisateur_id = %s;'''
+    mycursor.execute(sqlPanier,id_client)
+    items_panier=mycursor.fetchall()
+    #print(items_panier)
+
+    for item in items_panier:
+        #print(item)
+        id_boisson=item['id_boisson']
+        quantite=item['quantite']
+        #print('ID BOISSON : ',id_boisson)
+        #print('QUANTITE : ',quantite)
+
+        db = get_db()
+        mycursor = db.cursor()
+        sqlDelete = ''' DELETE FROM ligne_panier WHERE ligne_panier.boisson_id=%s AND ligne_panier.utilisateur_id=%s;'''
+        mycursor.execute(sqlDelete, (id_boisson, id_client))
+        db.commit()
+
+        db = get_db()
+        mycursor = db.cursor()
+        sqlAjout='''UPDATE boisson SET boisson.stock_boisson = boisson.stock_boisson+%s WHERE boisson.id_boisson = %s;'''
+        mycursor.execute(sqlAjout, (quantite,id_boisson))
+        db.commit()
+
+    return redirect('/client/article/show')
+
 
 
 @client_panier.route('/client/panier/filtre', methods=['POST'])
@@ -122,9 +190,7 @@ def client_panier_filtre():
     filter_prix_min = request.form.get('filter_prix_min', None)
     filter_prix_max = request.form.get('filter_prix_max', None)
     filter_types = request.form.getlist('filter_types', None)
-    print("LA LISTE DES TYPE BOISSONS DU FILTRE EST : ",filter_types)
-
-
+    #print("LA LISTE DES TYPE BOISSONS DU FILTRE EST : ",filter_types)
 
     if (filter_word and filter_word!=""):
         session["filter_word"] = filter_word
@@ -137,14 +203,13 @@ def client_panier_filtre():
         for i in filter_types:
             session['filter_types'].append(i)
 
-    # test des variables puis
-    # mise en session des variables
+
     return redirect('/client/article/show')
 
 
 @client_panier.route('/client/panier/filtre/suppr', methods=['POST'])
 def client_panier_filtre_suppr():
-    # suppression  des variables en session
+
     session.pop('filter_word', None)
     session.pop('filter_prix_min', None)
     session.pop('filter_prix_max', None)
