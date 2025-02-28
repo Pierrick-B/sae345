@@ -16,49 +16,127 @@ client_commande = Blueprint('client_commande', __name__,
 def client_commande_valide():
     mycursor = get_db().cursor()
     id_client = session['id_user']
-    sql = ''' selection des articles d'un panier 
+    sql = '''
+        SELECT 
+            boisson.nom_boisson AS nom,
+            boisson.id_boisson AS id_article,
+            ligne_panier.quantite_ligne_panier AS quantite,
+            boisson.prix_boisson AS prix,
+            boisson.photo_boisson AS image
+        FROM ligne_panier
+        INNER JOIN boisson ON ligne_panier.boisson_id = boisson.id_boisson
+        WHERE ligne_panier.utilisateur_id = %s
     '''
-    articles_panier = []
+    mycursor.execute(sql, (id_client,))
+    articles_panier = mycursor.fetchall()
+
     if len(articles_panier) >= 1:
-        sql = ''' calcul du prix total du panier '''
-        prix_total = None
+        sql = '''
+            SELECT SUM(boisson.prix_boisson * ligne_panier.quantite_ligne_panier) AS prix_total
+            FROM ligne_panier
+            INNER JOIN boisson ON ligne_panier.boisson_id = boisson.id_boisson
+            WHERE ligne_panier.utilisateur_id = %s
+        '''
+        mycursor.execute(sql, (id_client,))
+        prix_total = mycursor.fetchone()
     else:
         prix_total = None
+
     # etape 2 : selection des adresses
     return render_template('client/boutique/panier_validation_adresses.html'
-                           #, adresses=adresses
+                           # , adresses=adresses
                            , articles_panier=articles_panier
-                           , prix_total= prix_total
+                           , prix_total=prix_total
                            , validation=1
-                           #, id_adresse_fav=id_adresse_fav
+                           # , id_adresse_fav=id_adresse_fav
                            )
 
 
 @client_commande.route('/client/commande/add', methods=['POST'])
 def client_commande_add():
-    mycursor = get_db().cursor()
+    db = get_db()
+    mycursor = db.cursor()
 
     # choix de(s) (l')adresse(s)
+    nom_livraison = request.form.get('nom_livraison', '')
+    rue_livraison = request.form.get('rue_livraison', '')
+    code_postal_livraison = request.form.get('code_postal_livraison', '')
+    ville_livraison = request.form.get('ville_livraison', '')
+
+    nom_facturation = request.form.get('nom_facturation', '')
+    rue_facturation = request.form.get('rue_facturation', '')
+    code_postal_facturation = request.form.get('code_postal_facturation', '')
+    ville_facturation = request.form.get('ville_facturation', '')
 
     id_client = session['id_user']
-    sql = ''' selection du contenu du panier de l'utilisateur '''
-    items_ligne_panier = []
-    # if items_ligne_panier is None or len(items_ligne_panier) < 1:
-    #     flash(u'Pas d\'articles dans le ligne_panier', 'alert-warning')
-    #     return redirect('/client/article/show')
-                                           # https://pynative.com/python-mysql-transaction-management-using-commit-rollback/
-    #a = datetime.strptime('my date', "%b %d %Y %H:%M")
+    sql = '''
+        SELECT 
+            boisson.id_boisson AS id_article,
+            ligne_panier.quantite_ligne_panier AS quantite,
+            boisson.prix_boisson AS prix
+        FROM ligne_panier
+        INNER JOIN boisson ON ligne_panier.boisson_id = boisson.id_boisson
+        WHERE ligne_panier.utilisateur_id = %s
+    '''
+    mycursor.execute(sql, (id_client,))
+    items_ligne_panier = mycursor.fetchall()
 
-    sql = ''' creation de la commande '''
+    if items_ligne_panier is None or len(items_ligne_panier) < 1:
+        flash(u'Pas d\'articles dans le panier', 'alert-warning')
+        return redirect('/client/article/show')
 
-    sql = '''SELECT last_insert_id() as last_insert_id'''
-    # numéro de la dernière commande
-    for item in items_ligne_panier:
-        sql = ''' suppression d'une ligne de panier '''
-        sql = "  ajout d'une ligne de commande'"
+    # Transaction start
+    try:
+        # Création de la commande
+        sql = '''
+            INSERT INTO commande (date_achat_commande, etat_id, utilisateur_id)
+            VALUES (CURRENT_DATE(), 1, %s)
+        '''
+        mycursor.execute(sql, (id_client,))
 
-    get_db().commit()
-    flash(u'Commande ajoutée','alert-success')
+        # Récupération de l'ID de la dernière commande
+        sql = '''SELECT last_insert_id() as last_insert_id'''
+        mycursor.execute(sql)
+        last_insert_id = mycursor.fetchone()['last_insert_id']
+
+        # Ajout des adresses de livraison et facturation
+        sql = '''
+            INSERT INTO commande_adresse 
+            (commande_id, nom_livraison, rue_livraison, code_postal_livraison, ville_livraison, 
+            nom_facturation, rue_facturation, code_postal_facturation, ville_facturation)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        mycursor.execute(sql, (
+            last_insert_id,
+            nom_livraison, rue_livraison, code_postal_livraison, ville_livraison,
+            nom_facturation, rue_facturation, code_postal_facturation, ville_facturation
+        ))
+
+        # Ajout des lignes de commande et suppression du panier
+        for item in items_ligne_panier:
+            # Suppression d'une ligne de panier
+            sql = '''
+                DELETE FROM ligne_panier 
+                WHERE boisson_id = %s AND utilisateur_id = %s
+            '''
+            mycursor.execute(sql, (item['id_article'], id_client))
+
+            # Ajout d'une ligne de commande
+            sql = '''
+                INSERT INTO ligne_commande 
+                (boisson_id, commande_id, quantite_ligne_commande, prix_ligne_commande)
+                VALUES (%s, %s, %s, %s)
+            '''
+            prix_ligne = item['prix'] * item['quantite']
+            mycursor.execute(sql, (item['id_article'], last_insert_id, item['quantite'], prix_ligne))
+
+        db.commit()
+        flash(u'Commande ajoutée', 'alert-success')
+
+    except Exception as e:
+        db.rollback()
+        flash(u'Erreur lors de l\'ajout de la commande: ' + str(e), 'alert-danger')
+
     return redirect('/client/article/show')
 
 

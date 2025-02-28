@@ -23,16 +23,17 @@
                             <td>{{item_panier.prix}}</td>
                             <td>{{ "{:,.2f} €".format((item_panier.prix * item_panier.quantite)) }}{#{(panier.article.prix * panier.quantite)|number_format(2) }#}</td>
                             <td>
-{# #}                            {% if item_panier.stock is defined %}
-{# #}                               {% if item_panier.stock > 0 %}
-                                        <form action="/client/panier/add"  style="display: inline-block;"  method="post">
-{# #}                                   <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
-                                        <input type="hidden" name="quantite" value="1">
-                                        <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
-                                    <button class="btn btn-primary" > + </button>
-                                </form>
-{# #}                               {% endif %}
-{# #}                           {% endif %}
+                                {% if item_panier.quantite is defined %}
+                                   {% if item_panier.quantite > 0 %}
+                                      <form action="/client/panier/add" style="display: inline-block;" method="post">
+                                         <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
+                                         <input type="hidden" name="quantite" value="1">
+                                         <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
+                                         <button class="btn btn-primary"> + </button>
+                                      </form>
+                                   {% endif %}
+                                {% endif %}
+
                                 <form action="/client/panier/delete"   style="display: inline-block;"  method="post">
 {# #}                               <input type="hidden" name="id_declinaison_article" value="{{ item_panier.id_declinaison_article }}">
                                     <input type="hidden" name="id_article" value="{{ item_panier.id_article }}">
@@ -54,7 +55,7 @@
                         <a href="/client/article/show" class="btn btn-primary" >Continuer ma commande</a>
                     {% else %}
                     <form action="/client/panier/vider"  style="display: inline-block;"  method="post" >
-                        <button class="btn btn-primary"  > Éffacer tout </button>
+                        <button class="btn btn-primary"  > Effacer tout </button>
                     </form>
                     <form action="/client/commande/valide"  style="display: inline-block;"  method="post" >
                         <button class="btn btn-primary" > Passer ma commande </button>

@@ -112,6 +112,8 @@ def client_panier_delete():
     mycursor.execute(sqlAjout, id_article)
     db.commit()
 
+    return redirect('/client/article/show')
+
 
 
 @client_panier.route('/client/panier/delete/line', methods=['POST'])

@@ -4,13 +4,14 @@ USE sae345;
 
 DROP TABLE IF EXISTS ligne_panier;
 DROP TABLE IF EXISTS ligne_commande;
+DROP TABLE IF EXISTS commande_adresse;
 DROP TABLE IF EXISTS commande;
 DROP TABLE IF EXISTS boisson;
 DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS arome;
 DROP TABLE IF EXISTS type_boisson;
-DROP TABLE IF EXISTS commande_adresse;
+
 
 CREATE TABLE type_boisson(
    id_type_boisson INT AUTO_INCREMENT,
@@ -224,7 +225,7 @@ INSERT INTO ligne_panier (boisson_id, utilisateur_id, quantite_ligne_panier, dat
 (1, 2, 1, '2025-01-10'),
 (2, 2, 2, '2025-01-11'),
 (3, 2, 1, '2025-01-12'),
-(5, 3, 3, '2025-01-13')
+(5, 3, 3, '2025-01-13'),
 (24, 3, 2, '2025-01-13');
 
 

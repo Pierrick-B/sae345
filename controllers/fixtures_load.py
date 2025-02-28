@@ -145,16 +145,35 @@ def fct_fixtures_load():
     mycursor.execute(sql)
 
     sql = '''
-    INSERT INTO type_boisson (nom_type_boisson) VALUES
-    ('Soda'), ('Jus de fruit'), ('Alcool'), ('Hydratant');
+    INSERT INTO type_boisson(id_type_boisson,nom_type_boisson) VALUES
+    (NULL,'Soda'),
+    (NULL,'Jus de fruit'),
+    (NULL,'Alcool'),
+    (NULL,'Hydratant'); -- eau
     '''
     mycursor.execute(sql)
 
     sql = '''
-    INSERT INTO arome (nom_arome) VALUES
-    ('Sans arôme'), ('Cola'), ('Cerise'), ('Orange'), ('Citron'), ('Framboise'),
-    ('Fraise'), ('Pêche'), ('Pomme'), ('Raisin'), ('Mangue'), ('Tropical'),
-    ('Multifruits'), ('Cassis'), ('Ananas'), ('Autre');
+    INSERT INTO arome(id_arome,nom_arome) VALUES
+
+    (NULL,'Sans arôme'),
+    (NULL,'Cola'),
+    
+    -- Fruits
+    (NULL,'Cerise'),
+    (NULL,'Orange'),
+    (NULL,'Citron'),
+    (NULL,'Framboise'),
+    (NULL,'Fraise'),
+    (NULL,'Pêche'),
+    (NULL,'Pomme'),
+    (NULL,'Raison'),
+    (NULL,'Mangue'),
+    (NULL,'Tropical'),
+    (NULL,'Multifruits'),
+    (NULL,'Cassis'),
+    (NULL,'Ananas'),
+    (NULL,'Autre');
     '''
     mycursor.execute(sql)
 
@@ -173,32 +192,82 @@ def fct_fixtures_load():
     mycursor.execute(sql)
 
     sql = '''
-    INSERT INTO etat (id_etat, libelle_etat) VALUES
-    (1, 'En préparation'), (2, 'Expédiée');
+    INSERT INTO etat(id_etat,libelle_etat) VALUES
+    (NULL,'En préparation'),
+    (NULL,'Envoyé'),
+    (NULL,'Livré');
     '''
     mycursor.execute(sql)
 
     sql = '''
-    INSERT INTO boisson (nom_boisson, prix_boisson, volume_boisson, description_boisson, fournisseur_boisson, marque_boisson, photo_boisson, stock_boisson, type_boisson_id, arome_id) VALUES
-    ('Coca-Cola', 1.50, '330ml', 'Boisson gazeuse au goût de Cola', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola.png', 12, 1, 2),
-    ('Fanta Orange', 1.50, '330ml', 'Boisson gazeuse sucrée au goût d''orange', 'Coca-Cola Company', 'Fanta', 'fanta_orange.png', 14, 1, 4),
-    ('Whisky', 49.90, '750ml', 'Whisky écossais de grande qualité', 'Diageo', 'Johnnie Walker', 'whisky.png', 14, 3, 16);
+    INSERT INTO boisson (id_boisson,nom_boisson, prix_boisson, volume_boisson, description_boisson, fournisseur_boisson, marque_boisson, photo_boisson, stock_boisson, type_boisson_id, arome_id) VALUES
+    
+    -- SODA
+    (NULL,'Coca-Cola', 1.50, '330ml', 'Boisson gazeuse sucrée au goût de Cola', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola.png',12, 1, 2),
+    (NULL,'Coca-Cola Cherry',1.60,'330ml','Boisson gazeuse sucrée au goût de cerise', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola_cherry.png',10, 1, 3),
+    (NULL,'Coca-Cola Pêche',1.70,'330ml','Boisson gazeuse sucrée au goût de pêche', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola_peche.jpg',7, 1, 8),
+    (NULL,'Coca-Cola Citron',1.55,'330ml','Boisson gazeuse sucrée au goût de citron', 'Coca-Cola Company', 'Coca-Cola', 'coca_cola_citron.png',9, 1, 5),
+    
+    (NULL,'Fanta Orange', 1.50, '330ml', 'Boisson gazeuse sucrée au goût d''orange', 'Coca-Cola Company', 'Fanta', 'fanta_orange.png',14, 1, 4),
+    (NULL,'Fanta Citron', 1.55, '330ml', 'Boisson gazeuse sucrée au goût de citron', 'Coca-Cola Company', 'Fanta', 'fanta_citron.png', 12,1, 5),
+    (NULL,'Fanta Fraise', 1.60, '330ml', 'Boisson gazeuse sucrée au goût de fraise', 'Coca-Cola Company', 'Fanta', 'fanta_fraise.jpg', 8,1, 7),
+    (NULL,'Fanta Raisin', 1.45, '330ml', 'Boisson gazeuse sucrée au goût de raisin', 'Coca-Cola Company', 'Fanta', 'fanta_raisin.png', 6,1, 10),
+    (NULL,'Fanta Cassis', 1.60, '330ml', 'Boisson gazeuse sucrée au goût de cassis', 'Coca-Cola Company', 'Fanta', 'fanta_cassis.jpg', 5,1, 14),
+    (NULL,'Fanta Framboise', 1.50, '330ml', 'Boisson gazeuse sucrée au goût de framboise', 'Coca-Cola Company', 'Fanta', 'fanta_framboise.png', 3,1, 6),
+    (NULL,'Fanta Pomme', 1.50, '330ml', 'Boisson gazeuse sucrée au goût de pomme', 'Coca-Cola Company', 'Fanta', 'fanta_pomme.png', 7,1, 9),
+    
+    (NULL,'Lipton Pêche', 1.50, '330ml', 'Boisson sucrée au goût de pêche', 'Unilever', 'Lipton', 'lipton.jpg', 10,1, 8),
+    (NULL,'Lipton Citron', 1.60, '330ml', 'Boisson sucrée au goût de citron', 'Unilever', 'Lipton', 'lipton_citron.jpg', 18,1, 5),
+    (NULL,'Lipton Framboise', 1.70, '330ml', 'Boisson sucrée au goût de framboise', 'Unilever', 'Lipton', 'lipton_framboise.jpg',10, 1, 6),
+    (NULL,'Lipton Tropical', 1.40, '500ml', 'Boisson sucrée au goût tropical', 'Unilever', 'Lipton', 'lipton_tropical.jpg', 6,1, 12),
+    (NULL,'Lipton Mangue', 1.50, '330ml', 'Boisson sucrée au goût de mangue', 'Unilever', 'Lipton', 'lipton_mangue.jpeg', 8,1, 11),
+    
+    (NULL,'Oasis Tropical', 1.50, '330ml', 'Boisson sucrée au goût tropical', 'Orangina Suntory France', 'Oasis', 'oasis.jpg',16, 1, 12),
+    
+    (NULL,'Orangina', 1.50, '330ml', 'Boisson sucrée au goût tropical', 'Orangina Suntory France', 'Orangina', 'orangina.png', 14,1, 4),
+    
+    -- JUS DE FRUIT
+    (NULL,'Jus d''orange', 2.00, '1L', 'Jus d''orange 100% naturel', 'Tropicana', 'Tropicana', 'jus_orange.png', 8,2, 4),
+    (NULL,'Jus de pomme', 2.00, '1L', 'Jus de pomme 100% naturel', 'Tropicana', 'Tropicana', 'jus_pomme.png', 5,2, 9),
+    (NULL,'Jus de raisin', 2.40, '1L', 'Jus de raisin 100% naturel', 'Tropicana', 'Tropicana', 'jus_raisin.png', 8,2, 10),
+    (NULL,'Jus d''ananas', 2.30, '1L', 'Jus d''ananas 100% naturel', 'Tropicana', 'Tropicana', 'jus_ananas.png', 4,2, 15),
+    (NULL,'Jus multifruit', 1.80, '1L', 'Jus multifruit 100% naturel', 'Tropicana', 'Tropicana', 'jus_multifruit.png', 14,2, 13),
+    
+    -- ALCOOL
+    (NULL, 'Whisky', 49.90, '750ml', 'Whisky écossais de grande qualité', 'Diageo', 'Johnnie Walker', 'whisky.png', 14,3, 16),
+    (NULL, 'Vodka', 25.50, '700ml', 'Vodka pure et cristalline', 'Pernod Ricard', 'Absolut', 'vodka.jpg', 10,3, 1),
+    (NULL, 'Rhum', 32.00, '750ml', 'Rhum brun aux arômes épicés', 'Bacardi Limited', 'Bacardi', 'rhum.jpg', 8,3,16),
+    (NULL, 'Ricard', 18.90, '700ml', 'Pastis de Marseille emblématique', 'Pernod Ricard', 'Ricard', 'ricard.jpg', 5,3, 16),
+    (NULL, 'Bière', 2.50, '330ml', 'Bière blonde rafraîchissante', 'Heineken', 'Heineken', 'biere.jpg', 24,3, 16),
+    (NULL, 'Cidre', 4.90, '750ml', 'Cidre brut aux saveurs fruitées', 'Les Celliers Associés', 'Loïc Raison', 'cidre.jpg',13, 3, 16),
+    
+    -- EAU (Badoit, Carrola,)
+    (NULL,'Eau minérale', 0.80, '500ml', 'Eau minérale naturelle', 'Evian', 'Evian', 'eau_minerale.jpg', 20,4, 1),
+    (NULL,'Eau de source', 0.90, '500ml', 'Eau naturelle de source', 'Evian', 'Evian', 'eau_de_source.jpg', 18,4, 1),
+    (NULL,'Eau alcaline', 1.80, '500ml', 'Eau avec un pH élevé', 'Essentia', 'Essentia', 'eau_alcaline.jpg', 21,4, 1),
+    
+    (NULL,'Eau pétillante', 2.20, '1500ml', 'Eau gazeuse naturelle', 'Perrier', 'Perrier', 'eau_petillante.png', 21,4, 1),
+    (NULL,'Eau minérale gazeuse', 1.30, '500ml', 'Eau minérale avec bulles', 'San Pellegrino', 'San Pellegrino', 'eau_minerale_gazeuse.jpg',17, 4, 1),
+    
+    (NULL,'Eau aromatisée à la fraise', 1.50, '500ml', 'Eau avec arôme naturel de fraise', 'Hint', 'Hint', 'eau_aromatisee_fraise.jpg', 16,4, 7);
+
     '''
     mycursor.execute(sql)
 
     sql = '''
-    INSERT INTO commande (date_achat_commande, etat_id, utilisateur_id) VALUES
-    ('2025-01-15', 1, 2),
-    ('2025-01-16', 2, 2),
-    ('2025-01-17', 2, 3);
+    INSERT INTO commande (id_commande, date_achat_commande, etat_id, utilisateur_id) VALUES
+    (NULL, '2025-01-15', 1, 1),
+    (NULL, '2025-01-16', 2, 2),
+    (NULL, '2025-01-17', 3, 3);
     '''
     mycursor.execute(sql)
 
     sql = '''
     INSERT INTO ligne_commande (boisson_id, commande_id, quantite_ligne_commande, prix_ligne_commande) VALUES
-    (1, 1, 2, 99.80),
-    (2, 1, 1, 25.50),
-    (3, 2, 3, 96.00);
+    (1, 1, 2, 3.00),
+    (2, 1, 1, 1.60),
+    (3, 2, 3, 5.10),
+    (5, 3, 6, 9.00);
     '''
     mycursor.execute(sql)
 
@@ -206,7 +275,9 @@ def fct_fixtures_load():
     INSERT INTO ligne_panier (boisson_id, utilisateur_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES
     (1, 2, 1, '2025-01-10'),
     (2, 2, 2, '2025-01-11'),
-    (3, 3, 1, '2025-01-12');
+    (3, 2, 1, '2025-01-12'),
+    (5, 3, 3, '2025-01-13'),
+    (24, 3, 2, '2025-01-13');
     '''
     mycursor.execute(sql)
 
