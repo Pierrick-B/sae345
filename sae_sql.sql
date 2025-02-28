@@ -221,10 +221,11 @@ INSERT INTO ligne_commande (boisson_id, commande_id, quantite_ligne_commande, pr
 (5, 3, 6, 9.00);
 
 INSERT INTO ligne_panier (boisson_id, utilisateur_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES
-(1, 1, 1, '2025-01-10'),
-(2, 1, 2, '2025-01-11'),
+(1, 2, 1, '2025-01-10'),
+(2, 2, 2, '2025-01-11'),
 (3, 2, 1, '2025-01-12'),
-(5, 3, 3, '2025-01-13');
+(5, 3, 3, '2025-01-13')
+(24, 3, 2, '2025-01-13');
 
 
 
