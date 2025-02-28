@@ -15,12 +15,12 @@
                                     <span style="color:rgba(255,197,197,0.6);"> ( {{ ligne.nb_declinaisons }} declinaisons )</span>
                                     <span style="color:#6dcea2">
                                     {% if ligne.couleur_id != 1 %}
-                                        {{ ligne.libelle_couleur }} 
+                                        {{ ligne.libelle_couleur }}
                                     {% endif %}
                                     </span>
                                     <span  style="color:#d941c2">
                                     {% if ligne.taille_id != 1 %}
-                                        {{ ligne.libelle_taille }} 
+                                        {{ ligne.libelle_taille }}
                                     {% endif %}
                                     </span>
                                 {% endif %}
@@ -64,12 +64,25 @@
                         </thead>
                         <tbody>
                         {% for commande in commandes %}
-                            <tr>
-                                <td>{{ commande.id_commande }}</td>
-                                <td>{{ commande.date_achat_commande }}</td>
-                                <td>{{ commande.nbr_articles }}</td>
-                                <td>{{ commande.cout_total }}</td>
-                                <td>{{ commande.etat_id }}</td>
+                            <tr id="tr" {% if commande.etat_id == 1 %} style="background-color:#FFD600; font-weight: bold;" {% endif %}>
+                                <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
+                                <td> {{ commande.nbr_articles }} </td>
+                                <td>
+                                    {{ commande.cout_total }} €
+                                </td>
+                                <td style="text-align: center;"  >
+                                    {% if commande.etat_id == 1 %} <div style="background-color: #ba8b00; padding: 5px;">
+                                      en cours de traitement
+                                    </div>
+                                    {% else %} <div style="background-color: #34ce57; padding: 5px;">
+                                        expédié  </div>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: center;">
+                                    <a href="/client/commande/show?id_commande={{ commande.id_commande }}">
+                                        <button class="btn btn-primary" > Details </button>
+                                    </a>
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>

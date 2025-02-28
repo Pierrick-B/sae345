@@ -3,6 +3,8 @@
     <div class="container-fluid">
         {% if articles_commande %}
             <h3>Recapitulatifs de la commande selectionnée</h3>
+            <p><strong>Client :</strong> {{ articles_commande[0].nom_client }} ({{ articles_commande[0].login_client }})</p>
+            <p><strong>Email :</strong> {{ articles_commande[0].email_client }}</p>
             <table class="table">
                 <thead class="thead-dark">
                     <tr><th>Nom</th><th>Quantite</th><th>Prix</th><th>Prix total</th></tr>
@@ -46,10 +48,10 @@
                 </div>
 
             {% if articles_commande[0].etat_id == 1 %}
-            <form action="/admin/commande/valider"  style="display: inline-block;"  method="post">
-                  <input type="hidden" name="idCommande" value="{{ articles_commande[0].id }}">
-                  <button class="btn btn-primary" > Valider (Expédier) </button>
-            </form>
+                <form action="/admin/commande/valider"  style="display: inline-block;"  method="post">
+                      <input type="hidden" name="id_commande" value="{{ articles_commande[0].id }}">
+                      <button class="btn btn-primary" type="submit" > Valider (Expédier) </button>
+                </form>
             {% endif %}
             <hr>
         {% endif %}
@@ -76,11 +78,11 @@
                             <tr id="" {% if commande.etat_id == 1 %} class="table-warning" style="font-weight: bold;"{% endif %}>
                                 <td>{{ commande.login }}</td>
                                 <td>{{ commande.date_achat.strftime('%d-%m-%Y') }}</td>
-                                <td> {{ commande.nbr_articles }} </td>
+                                <td> {{ commande.nombre_boissons }} </td>
                                 <td>
-                                    {{ commande.prix_total }}
+                                    {{ commande.cout_total }}
                                 </td>
-                                <td> {{ commande.libelle }}</td>
+                                <td> {{ commande.etat_commande }}</td>
                                 <td style="text-align: center;">
                                     <form action="/admin/commande/valider" style="display: inline-block;"  method="post">
                                         <input type="hidden" name="id_commande" value="{{ commande.id_commande }}">

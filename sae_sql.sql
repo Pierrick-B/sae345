@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS arome;
 DROP TABLE IF EXISTS type_boisson;
+DROP TABLE commande_adresse;
 
 CREATE TABLE type_boisson(
    id_type_boisson INT AUTO_INCREMENT,
@@ -45,7 +46,6 @@ CREATE TABLE etat(
    PRIMARY KEY(id_etat)
 );
 
--- AJOUTER STOCK POUR BOISSONS
 CREATE TABLE boisson(
    id_boisson INT AUTO_INCREMENT,
    nom_boisson VARCHAR(255),
@@ -54,7 +54,7 @@ CREATE TABLE boisson(
    description_boisson VARCHAR(255),
    fournisseur_boisson VARCHAR(255),
    marque_boisson VARCHAR(255),
-   photo_boisson VARCHAR(255),      -- pour associer la photo
+   photo_boisson VARCHAR(255),
    stock_boisson INT,
    type_boisson_id INT NOT NULL,
    arome_id INT NOT NULL,
@@ -96,6 +96,20 @@ CREATE TABLE ligne_panier(
 );
 
 
+CREATE TABLE commande_adresse (
+   id_commande_adresse INT AUTO_INCREMENT PRIMARY KEY,
+   commande_id INT,
+   nom_livraison VARCHAR(255),
+   rue_livraison VARCHAR(255),
+   code_postal_livraison VARCHAR(20),
+   ville_livraison VARCHAR(255),
+   nom_facturation VARCHAR(255),
+   rue_facturation VARCHAR(255),
+   code_postal_facturation VARCHAR(20),
+   ville_facturation VARCHAR(255),
+   FOREIGN KEY (commande_id) REFERENCES commande(id_commande)
+);
+
 INSERT INTO type_boisson(id_type_boisson,nom_type_boisson) VALUES
 (NULL,'Soda'),
 (NULL,'Jus de fruit'),
@@ -124,6 +138,14 @@ INSERT INTO arome(id_arome,nom_arome) VALUES
 (NULL,'Ananas'),
 (NULL,'Autre');
 
+INSERT INTO etat(id_etat,libelle_etat) VALUES
+(NULL,'En préparation'),
+(NULL,'Envoyé'),
+(NULL,'Livré');
+
+
+
+
 INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) VALUES
 (1,'admin','admin@admin.fr',
     'scrypt:32768:8:1$irSP6dJEjy1yXof2$56295be51bb989f467598b63ba6022405139656d6609df8a71768d42738995a21605c9acbac42058790d30fd3adaaec56df272d24bed8385e66229c81e71a4f4',
@@ -134,11 +156,6 @@ INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) 
 (3,'client2','client2@client2.fr',
     'scrypt:32768:8:1$l3UTNxiLZGuBKGkg$ae3af0d19f0d16d4a495aa633a1cd31ac5ae18f98a06ace037c0f4fb228ed86a2b6abc64262316d0dac936eb72a67ae82cd4d4e4847ee0fb0b19686ee31194b3',
     'ROLE_client','client2','1');
-
-INSERT INTO etat(id_etat,libelle_etat) VALUES
-(NULL,'En préparation'),
-(NULL,'Envoyé'),
-(NULL,'Livré');
 
 INSERT INTO boisson (id_boisson,nom_boisson, prix_boisson, volume_boisson, description_boisson, fournisseur_boisson, marque_boisson, photo_boisson, stock_boisson, type_boisson_id, arome_id) VALUES
 
@@ -198,10 +215,10 @@ INSERT INTO commande (id_commande, date_achat_commande, etat_id, utilisateur_id)
 (NULL, '2025-01-17', 3, 3);
 
 INSERT INTO ligne_commande (boisson_id, commande_id, quantite_ligne_commande, prix_ligne_commande) VALUES
-(1, 1, 2, 99.80),
-(2, 1, 1, 25.50),
-(3, 2, 3, 96.00),
-(5, 3, 6, 15.00);
+(1, 1, 2, 3.00),
+(2, 1, 1, 1.60),
+(3, 2, 3, 5.10),
+(5, 3, 6, 9.00);
 
 INSERT INTO ligne_panier (boisson_id, utilisateur_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES
 (1, 1, 1, '2025-01-10'),
@@ -210,6 +227,12 @@ INSERT INTO ligne_panier (boisson_id, utilisateur_id, quantite_ligne_panier, dat
 (5, 3, 3, '2025-01-13');
 
 
+
+INSERT INTO commande_adresse (commande_id, nom_livraison, rue_livraison, code_postal_livraison, ville_livraison, nom_facturation, rue_facturation, code_postal_facturation, ville_facturation)
+VALUES
+(1, 'John Doe', '123 Rue de Paris', '75001', 'Paris', 'John Doe', '123 Rue de Paris', '75001', 'Paris'),
+(2, 'Jane Smith', '456 Avenue de la République', '69001', 'Lyon', 'Jane Smith', '456 Avenue de la République', '69001', 'Lyon'),
+(3, 'Alice Johnson', '789 Boulevard Saint-Germain', '75005', 'Paris', 'Alice Johnson', '789 Boulevard Saint-Germain', '75005', 'Paris');
 
 
 

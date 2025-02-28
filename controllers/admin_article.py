@@ -115,14 +115,26 @@ def edit_article():
     id_article=request.args.get('id_article')
     mycursor = get_db().cursor()
     sql = '''
-    requête admin_article_6    
-    '''
+            SELECT 
+                boisson.id_boisson AS id_article,
+                boisson.nom_boisson AS nom,
+                boisson.prix_boisson AS prix,
+                boisson.photo_boisson AS image,
+                boisson.type_boisson_id AS type_article_id,
+                boisson.stock_boisson AS stock,
+                boisson.description_boisson AS description
+            FROM boisson
+            WHERE boisson.id_boisson = %s;
+        '''
     mycursor.execute(sql, id_article)
     article = mycursor.fetchone()
     print(article)
     sql = '''
-    requête admin_article_7
-    '''
+            SELECT 
+                id_type_boisson AS id_type_article,
+                nom_type_boisson AS libelle
+            FROM type_boisson;
+        '''
     mycursor.execute(sql)
     types_article = mycursor.fetchall()
 
@@ -141,43 +153,47 @@ def edit_article():
 
 @admin_article.route('/admin/article/edit', methods=['POST'])
 def valid_edit_article():
-    mycursor = get_db().cursor()
-    nom = request.form.get('nom')
+    db = get_db()
+    mycursor = db.cursor()
+
+    # Récupération des valeurs du formulaire
     id_article = request.form.get('id_article')
+    nom = request.form.get('nom')
     image = request.files.get('image', '')
     type_article_id = request.form.get('type_article_id', '')
     prix = request.form.get('prix', '')
     description = request.form.get('description')
+    stock = request.form.get('stock', '')
+
     sql = '''
-       requête admin_article_8
-       '''
-    mycursor.execute(sql, id_article)
+       SELECT photo_boisson AS image FROM boisson WHERE id_boisson = %s
+    '''
+    mycursor.execute(sql, (id_article,))
     image_nom = mycursor.fetchone()
-    image_nom = image_nom['image']
+    image_nom = image_nom['image'] if image_nom else None
+
     if image:
-        if image_nom != "" and image_nom is not None and os.path.exists(
-                os.path.join(os.getcwd() + "/static/images/", image_nom)):
-            os.remove(os.path.join(os.getcwd() + "/static/images/", image_nom))
-        # filename = secure_filename(image.filename)
-        if image:
-            filename = 'img_upload_' + str(int(2147483647 * random())) + '.png'
-            image.save(os.path.join('static/images/', filename))
-            image_nom = filename
+        if image_nom and os.path.exists(os.path.join("static/images/", image_nom)):
+            os.remove(os.path.join("static/images/", image_nom))
 
-    sql = '''  requête admin_article_9 '''
-    mycursor.execute(sql, (nom, image_nom, prix, type_article_id, description, id_article))
+        filename = 'img_upload_' + str(int(2147483647 * random())) + '.png'
+        image.save(os.path.join('static/images/', filename))
+        image_nom = filename
 
-    get_db().commit()
-    if image_nom is None:
-        image_nom = ''
-    message = u'article modifié , nom:' + nom + '- type_article :' + type_article_id + ' - prix:' + prix  + ' - image:' + image_nom + ' - description: ' + description
+    sql = '''
+        UPDATE boisson
+        SET nom_boisson = %s, photo_boisson = %s, prix_boisson = %s, 
+            type_boisson_id = %s, description_boisson = %s, stock_boisson = %s
+        WHERE id_boisson = %s
+    '''
+    mycursor.execute(sql, (nom, image_nom, prix, type_article_id, description, stock, id_article))
+
+    db.commit()
+
+    message = f"Article modifié : nom={nom}, type_article={type_article_id}, prix={prix}, stock={stock}, image={image_nom}, description={description}"
     flash(message, 'alert-success')
+
     return redirect('/admin/article/show')
-
-
-
-
-
 
 
 @admin_article.route('/admin/article/avis/<int:id>', methods=['GET'])

@@ -11,29 +11,35 @@ client_panier = Blueprint('client_panier', __name__,
 
 @client_panier.route('/client/panier/add', methods=['POST'])
 def client_panier_add():
-    mycursor = get_db().cursor()
+    db = get_db()
+    mycursor = db.cursor()
     id_client = session['id_user']
     id_article = request.form.get('id_article')
     quantite = request.form.get('quantite')
 
     sql = '''SELECT * FROM ligne_panier WHERE boisson_id = %s AND utilisateur_id = %s'''
-    mycursor.execute(sql, (id_client, id_article))
-    article_panier = mycursor.fetchone()
+    mycursor.execute(sql, (id_article, id_client))
+    articles_panier = mycursor.fetchone()
 
-    mycursor.execute("SELECT * FROM boisson WHERE boisson_id = %s", (id_article,))
+    mycursor.execute("SELECT * FROM boisson WHERE id_boisson = %s", (id_article,))
     article = mycursor.fetchone()
 
-    if not (article_panier is None) and article_panier['quantité'] >= 1:
+    if not (articles_panier is None) and article['stock_boisson'] >=int(quantite):
         tuple_update = (quantite, id_client, id_article)
         sql = '''UPDATE ligne_panier SET quantite_ligne_panier = quantite_ligne_panier+%s WHERE utilisateur_id = %s AND boisson_id = %s'''
         mycursor.execute(sql, tuple_update)
+        sql = '''UPDATE boisson SET stock_boisson = stock_boisson-%s WHERE id_boisson = %s'''
+        mycursor.execute(sql, (quantite, id_article))
     else:
-        tuple_insert = (id_client, id_article, quantite)
-        sql = '''INSERT INTO ligne_panier(utilisateur_id, boisson_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES (%s, %s, %s, current_timestop )'''
-        mycursor.execute(sql, tuple_insert)
+        if article['stock_boisson'] >= int(quantite):
+            tuple_insert = (id_article, id_client, quantite)
+            sql = '''INSERT INTO ligne_panier(boisson_id ,utilisateur_id, quantite_ligne_panier, date_ajout_ligne_panier) VALUES (%s, %s, %s, current_timestamp )'''
+            mycursor.execute(sql, tuple_insert)
+            sql = '''UPDATE boisson SET stock_boisson = stock_boisson-%s WHERE id_boisson = %s'''
+            mycursor.execute(sql, (quantite, id_article))
 
-    get_db().commit()
-    return redirect('/client/panier/show')
+    db.commit()
+    return redirect('/client/article/show')
     # ---------
     #id_declinaison_article=request.form.get('id_declinaison_article',None)
     id_declinaison_article = 1
@@ -94,7 +100,6 @@ def client_panier_delete():
 
     else:
         # print("LA QUANTITE EST ÉGALE À 1")
-
         db = get_db()
         mycursor = db.cursor()
         sqlDelete = ''' DELETE FROM ligne_panier WHERE ligne_panier.boisson_id = %s AND ligne_panier.utilisateur_id=%s;'''
@@ -107,7 +112,6 @@ def client_panier_delete():
     mycursor.execute(sqlAjout, id_article)
     db.commit()
 
-    return redirect('/client/article/show')
 
 
 @client_panier.route('/client/panier/delete/line', methods=['POST'])
