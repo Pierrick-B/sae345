@@ -11,7 +11,8 @@ fixtures_load = Blueprint('fixtures_load', __name__,
 
 @fixtures_load.route('/base/init')
 def fct_fixtures_load():
-    mycursor = get_db().cursor()
+    db = get_db()
+    mycursor = db.cursor()
 
     sql = '''
     DROP TABLE IF EXISTS ligne_panier,
@@ -21,7 +22,8 @@ def fct_fixtures_load():
                         etat,
                         utilisateur,
                         arome,
-                        type_boisson;
+                        type_boisson,
+                        commande_adresse;
     '''
     mycursor.execute(sql)
 
@@ -126,6 +128,23 @@ def fct_fixtures_load():
     mycursor.execute(sql)
 
     sql = '''
+        CREATE TABLE commande_adresse (
+           id_commande_adresse INT AUTO_INCREMENT PRIMARY KEY,
+           commande_id INT,
+           nom_livraison VARCHAR(255),
+           rue_livraison VARCHAR(255),
+           code_postal_livraison VARCHAR(20),
+           ville_livraison VARCHAR(255),
+           nom_facturation VARCHAR(255),
+           rue_facturation VARCHAR(255),
+           code_postal_facturation VARCHAR(20),
+           ville_facturation VARCHAR(255),
+           FOREIGN KEY (commande_id) REFERENCES commande(id_commande)
+        );
+        '''
+    mycursor.execute(sql)
+
+    sql = '''
     INSERT INTO type_boisson (nom_type_boisson) VALUES
     ('Soda'), ('Jus de fruit'), ('Alcool'), ('Hydratant');
     '''
@@ -140,10 +159,16 @@ def fct_fixtures_load():
     mycursor.execute(sql)
 
     sql = '''
-    INSERT INTO utilisateur (id_utilisateur, login, email, password, role, nom, est_actif) VALUES
-    (1, 'admin', 'admin@admin.fr', 'hash1', 'ROLE_admin', 'admin', 1),
-    (2, 'client', 'client@client.fr', 'hash2', 'ROLE_client', 'client', 1),
-    (3, 'client2', 'client2@client2.fr', 'hash3', 'ROLE_client', 'client2', 1);
+    INSERT INTO utilisateur(id_utilisateur,login,email,password,role,nom,est_actif) VALUES
+    (1,'admin','admin@admin.fr',
+        'scrypt:32768:8:1$irSP6dJEjy1yXof2$56295be51bb989f467598b63ba6022405139656d6609df8a71768d42738995a21605c9acbac42058790d30fd3adaaec56df272d24bed8385e66229c81e71a4f4',
+        'ROLE_admin','admin','1'),
+    (2,'client','client@client.fr',
+        'scrypt:32768:8:1$iFP1d8bdBmhW6Sgc$7950bf6d2336d6c9387fb610ddaec958469d42003fdff6f8cf5a39cf37301195d2e5cad195e6f588b3644d2a9116fa1636eb400b0cb5537603035d9016c15910',
+        'ROLE_client','client','1'),
+    (3,'client2','client2@client2.fr',
+        'scrypt:32768:8:1$l3UTNxiLZGuBKGkg$ae3af0d19f0d16d4a495aa633a1cd31ac5ae18f98a06ace037c0f4fb228ed86a2b6abc64262316d0dac936eb72a67ae82cd4d4e4847ee0fb0b19686ee31194b3',
+        'ROLE_client','client2','1');
     '''
     mycursor.execute(sql)
 
@@ -185,6 +210,15 @@ def fct_fixtures_load():
     '''
     mycursor.execute(sql)
 
-    get_db().commit()
+    sql = '''
+        INSERT INTO commande_adresse (commande_id, nom_livraison, rue_livraison, code_postal_livraison, ville_livraison, nom_facturation, rue_facturation, code_postal_facturation, ville_facturation) VALUES
+        (1, 'John Doe', '123 Rue de Paris', '75001', 'Paris', 'John Doe', '123 Rue de Paris', '75001', 'Paris'),
+        (2, 'Jane Smith', '456 Avenue de la République', '69001', 'Lyon', 'Jane Smith', '456 Avenue de la République', '69001', 'Lyon'),
+        (3, 'Alice Johnson', '789 Boulevard Saint-Germain', '75005', 'Paris', 'Alice Johnson', '789 Boulevard Saint-Germain', '75005', 'Paris');
+
+        '''
+    mycursor.execute(sql)
+
+    db.commit()
 
     return redirect('/')

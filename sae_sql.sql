@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS etat;
 DROP TABLE IF EXISTS utilisateur;
 DROP TABLE IF EXISTS arome;
 DROP TABLE IF EXISTS type_boisson;
-DROP TABLE commande_adresse;
+DROP TABLE IF EXISTS commande_adresse;
 
 CREATE TABLE type_boisson(
    id_type_boisson INT AUTO_INCREMENT,
